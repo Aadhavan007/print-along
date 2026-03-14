@@ -14,7 +14,7 @@ function uploadToCloudinary(buffer, filename) {
     const stream = cloudinary.uploader.upload_stream(
       {
         resource_type: "auto",        // allow any file type
-        public_id: filename,          // keep original filename
+        public_id: filename.split(".")[0],          // keep original filename
         use_filename: true,
         unique_filename: false,
         flags: "attachment"           // force download when opened
