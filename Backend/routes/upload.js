@@ -15,7 +15,10 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     const fileBuffer = req.file.buffer
 
-    const fileUrl = await uploadToCloudinary(fileBuffer)
+    const fileUrl = await uploadToCloudinary(
+      fileBuffer,
+      req.file.originalname
+    )
 
     const jobId = Date.now().toString()
 
