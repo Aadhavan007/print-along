@@ -11,11 +11,16 @@ function uploadToCloudinary(buffer) {
   return new Promise((resolve, reject) => {
 
     const stream = cloudinary.uploader.upload_stream(
-      { resource_type: "auto" },
+      {
+        resource_type: "auto",
+        use_filename: true,
+        unique_filename: false,
+        flags: "attachment"
+      },
       (error, result) => {
 
         if (error) reject(error)
-        else resolve(result.secure_url + "?fl_attachment")
+        else resolve(result.secure_url)
 
       }
     )
@@ -26,6 +31,4 @@ function uploadToCloudinary(buffer) {
 
 }
 
-module.exports = {
-  uploadToCloudinary
-}
+module.exports = { uploadToCloudinary }
