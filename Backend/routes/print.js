@@ -15,6 +15,9 @@ router.get("/:job_id", async (req, res) => {
 
   const response = await axios.get(fileUrl, { responseType: "stream" })
 
+  res.setHeader("Content-Disposition", "attachment")
+  res.setHeader("Content-Type", response.headers["content-type"])
+
   response.data.pipe(res)
 
 })
