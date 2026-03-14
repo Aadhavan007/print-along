@@ -32,7 +32,7 @@ async function uploadFile(){
 
     const data = await res.json()
 
-    document.getElementById("qr").src = data.url
+    document.getElementById("qr").src = data.qr_code_url
 
 }
 
