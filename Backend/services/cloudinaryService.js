@@ -1,20 +1,31 @@
 const cloudinary = require("cloudinary").v2
 
 cloudinary.config({
-  cloud_name: "YOUR_CLOUD_NAME",
-  api_key: "YOUR_API_KEY",
-  api_secret: "YOUR_API_SECRET"
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-async function uploadFile(filePath) {
+function uploadToCloudinary(buffer) {
 
-  const result = await cloudinary.uploader.upload(filePath, {
-    resource_type: "auto"
+  return new Promise((resolve, reject) => {
+
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto" },
+      (error, result) => {
+
+        if (error) reject(error)
+        else resolve(result.secure_url)
+
+      }
+    )
+
+    stream.end(buffer)
+
   })
 
-  return result.secure_url
 }
 
 module.exports = {
-  uploadToCloudinary: uploadFile
+  uploadToCloudinary
 }

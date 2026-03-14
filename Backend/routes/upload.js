@@ -1,46 +1,29 @@
 const express = require("express")
-const router = express.Router()
 const multer = require("multer")
+
 const { uploadToCloudinary } = require("../services/cloudinaryService")
-const { generateQR } = require("../services/qrService")
-const jobStore = require("../store/jobStore")
-const { v4: uuidv4 } = require("uuid")
+
+const router = express.Router()
 
 const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const upload = multer({ storage })
 
 router.post("/", upload.single("file"), async (req, res) => {
 
-    try {
+  try {
 
-        if (!req.file) {
-            return res.status(400).json({ error: "No file uploaded" })
-        }
+    const fileBuffer = req.file.buffer
 
-        const jobId = uuidv4()
+    const url = await uploadToCloudinary(fileBuffer)
 
-        const fileUrl = await uploadToCloudinary(req.file.buffer)
+    res.json({ url })
 
-        jobStore[jobId] = fileUrl
+  } catch (error) {
 
-        const qr = await generateQR(
-            `https://print-along-api.onrender.com/print/${jobId}`
-        )
+    console.error(error)
+    res.status(500).json({ error: "Upload failed" })
 
-        res.json({
-            job_id: jobId,
-            qr_code_url: qr
-        })
-
-    } catch (err) {
-
-        console.error(err)
-
-        res.status(500).json({
-            error: "Upload failed"
-        })
-
-    }
+  }
 
 })
 
