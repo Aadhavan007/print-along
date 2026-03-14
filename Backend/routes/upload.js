@@ -22,7 +22,7 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     jobs[jobId] = fileUrl
 
-    const downloadLink = `http://localhost:5000/print/${jobId}`
+    const downloadLink = `https://print-along-api.onrender.com/print/${jobId}`
 
     const qr = await generateQR(downloadLink)
 
