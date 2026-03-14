@@ -15,4 +15,6 @@ async function uploadFile(filePath) {
   return result.secure_url
 }
 
-module.exports = uploadFile
+module.exports = {
+  uploadToCloudinary: uploadFile
+}
