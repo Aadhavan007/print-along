@@ -1,3 +1,8 @@
+const express = require("express")
+const jobs = require("../store/jobStore")
+
+const router = express.Router()
+
 router.get("/:job_id", (req, res) => {
 
   const jobId = req.params.job_id
@@ -10,3 +15,5 @@ router.get("/:job_id", (req, res) => {
   res.redirect(fileUrl)
 
 })
+
+module.exports = router
