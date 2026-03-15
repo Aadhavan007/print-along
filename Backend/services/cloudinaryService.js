@@ -23,7 +23,6 @@ function uploadToCloudinary(buffer, filename) {
         public_id: cleanName,
         use_filename: true,
         unique_filename: false,
-        flags: "attachment"
       },
       (error, result) => {
 
