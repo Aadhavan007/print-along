@@ -14,24 +14,24 @@ function uploadToCloudinary(buffer, filename) {
     // Remove spaces at start/end
     let cleanName = filename.trim()
 
-    // replace spaces
+    // Replace spaces with underscore
     cleanName = cleanName.replace(/\s+/g, "_")
 
     const stream = cloudinary.uploader.upload_stream(
       {
         resource_type: "auto",
+        public_id: cleanName,
         use_filename: true,
-        unique_filename: true,
+        unique_filename: false,
+        flags: "attachment"
       },
       (error, result) => {
-
         if (error) {
           console.error("Cloudinary Upload Error:", error)
           reject(error)
         } else {
           resolve(result.secure_url)
         }
-
       }
     )
 
