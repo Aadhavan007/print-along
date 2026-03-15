@@ -12,12 +12,7 @@ router.get("/:job_id", (req, res) => {
     return res.status(404).send("Job not found")
   }
 
-  const downloadUrl = fileUrl.replace(
-    "/upload/",
-    "/upload/fl_attachment/"
-  )
-
-  res.redirect(downloadUrl)
+  res.redirect(fileUrl)
 
 })
 
