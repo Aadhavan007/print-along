@@ -14,6 +14,20 @@ function uploadToCloudinary(buffer, filename) {
     // Remove spaces at start/end
     let cleanName = filename.trim()
 
+    // remove extension first
+    const ext = cleanName.split('.').pop()
+
+    // remove extension from name
+    cleanName = cleanName.replace(`.${ext}`, "")
+
+    // replace spaces
+    cleanName = cleanName.replace(/\s+/g, "_")
+
+    // remove special characters like [ ] ( ) etc
+    cleanName = cleanName.replace(/[^a-zA-Z0-9_-]/g, "")
+
+    cleanName = `${cleanName}.${ext}`
+
     // Replace spaces with underscore
     cleanName = cleanName.replace(/\s+/g, "_")
 
