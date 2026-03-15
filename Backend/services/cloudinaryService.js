@@ -1,26 +1,44 @@
 const cloudinary = require("cloudinary").v2
 
+// Configure Cloudinary using environment variables
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-async function uploadToCloudinary(buffer, filename) {
+function uploadToCloudinary(buffer, filename) {
 
-  // convert buffer → base64
-  const base64File = buffer.toString("base64")
+  return new Promise((resolve, reject) => {
 
-  const result = await cloudinary.uploader.upload(
-    `data:application/octet-stream;base64,${base64File}`,
-    {
-      resource_type: "auto",
-      use_filename: true,
-      unique_filename: true
-    }
-  )
+    // Remove spaces at start/end
+    let cleanName = filename.trim()
 
-  return result.secure_url
+    // replace spaces
+    cleanName = cleanName.replace(/\s+/g, "_")
+
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "auto",
+        use_filename: true,
+        unique_filename: true,
+      },
+      (error, result) => {
+
+        if (error) {
+          console.error("Cloudinary Upload Error:", error)
+          reject(error)
+        } else {
+          resolve(result.secure_url)
+        }
+
+      }
+    )
+
+    stream.end(buffer)
+
+  })
+
 }
 
 module.exports = {
