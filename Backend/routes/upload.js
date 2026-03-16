@@ -2,7 +2,7 @@ const express = require("express")
 const multer = require("multer")
 const { uploadToCloudinary } = require("../services/cloudinaryService")
 const generateQR = require("../services/qrService")
-const jobs = require("../store/jobStore")
+const Job = require("../models/Job")
 
 const router = express.Router()
 
@@ -22,7 +22,10 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     const jobId = Date.now().toString()
 
-    jobs[jobId] = fileUrl
+    await Job.create({
+      job_id: jobId,
+      file_url: fileUrl
+    })
 
     const printUrl = `https://print-along-api.onrender.com/print/${jobId}`
 

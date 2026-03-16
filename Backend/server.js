@@ -1,10 +1,14 @@
 const express = require("express")
 const cors = require("cors")
 
+const connectDB = require("./config/db")
+
 const uploadRoute = require("./routes/upload")
 const printRoute = require("./routes/print")
 
 const app = express()
+
+connectDB()
 
 app.use(cors())
 app.use(express.json())

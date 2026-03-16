@@ -1,21 +1,33 @@
 const express = require("express")
-const jobs = require("../store/jobStore")
+const Job = require("../models/Job")
 
 const router = express.Router()
 
-router.get("/:job_id", (req, res) => {
+router.get("/:job_id", async (req, res) => {
 
-  const jobId = req.params.job_id
-  const fileUrl = jobs[jobId]
+  try {
 
-  if (!fileUrl) {
-    return res.status(404).send("Job not found")
+    const jobId = req.params.job_id
+
+    const job = await Job.findOne({ job_id: jobId })
+
+    if (!job) {
+      return res.status(404).send("Job not found")
+    }
+
+    const fileUrl = job.file_url
+
+    // Force Cloudinary to download instead of opening
+    const downloadUrl = fileUrl.replace("/upload/", "/upload/fl_attachment/")
+
+    res.redirect(downloadUrl)
+
+  } catch (error) {
+
+    console.error(error)
+    res.status(500).send("Server error")
+
   }
-
-  // Force Cloudinary to download the file instead of rendering
-  const downloadUrl = fileUrl.replace("/upload/", "/upload/fl_attachment/")
-
-  res.redirect(downloadUrl)
 
 })
 
