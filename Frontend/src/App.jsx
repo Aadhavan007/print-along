@@ -1,7 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import * as pdfjsLib from "pdfjs-dist"
 
-// Setup PDF worker
+// ✅ Setup PDF worker
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
@@ -34,27 +34,29 @@ function App() {
     })
   }
 
-  const handleFileUpload = async (e) => {
-
-    const selectedFile = e.target.files[0]
+  // ✅ MAIN FILE PROCESSOR (used by both click + drag)
+  const processFile = async (selectedFile) => {
     if (!selectedFile) return
 
     setFile(selectedFile)
+    setQr(null) // reset QR on new upload
 
-    // Preview only for PDF
+    // PDF handling
     if (selectedFile.type === "application/pdf") {
-      setPreview(URL.createObjectURL(selectedFile))
+      const url = URL.createObjectURL(selectedFile)
+      setPreview(url)
 
       try {
         const count = await getPdfPageCount(selectedFile)
         setPages(count)
-      } catch {
+      } catch (err) {
+        console.error(err)
         setPages(1)
       }
 
     } else {
       setPreview(null)
-      setPages(1) // fallback for Word/Excel
+      setPages(1) // fallback for docx, etc.
     }
 
     // Upload to backend
@@ -78,6 +80,22 @@ function App() {
     }
   }
 
+  // ✅ CLICK upload
+  const handleFileUpload = (e) => {
+    const selectedFile = e.target.files[0]
+    processFile(selectedFile)
+
+    // reset input so same file can be re-uploaded
+    e.target.value = null
+  }
+
+  // ✅ CLEANUP preview memory
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [preview])
+
   const totalAmount = pages * copies * PRICE_PER_PAGE
 
   return (
@@ -93,35 +111,33 @@ function App() {
 
       <h2>Upload Document</h2>
 
-      {/* Upload Box */}
-    <div
-      onDrop={(e) => {
-      e.preventDefault()
-      const droppedFile = e.dataTransfer.files[0]
-      if (droppedFile) {
-      handleFileUpload({ target: { files: [droppedFile] } })
-      }
-    }}
-    onDragOver={(e) => e.preventDefault()}
-    style={{
-    border: "2px dashed gray",
-    padding: "30px",
-    width: "400px",
-    textAlign: "center",
-    marginBottom: "20px"
-    }}
->
-    <input
-    type="file"
-    onChange={handleFileUpload}
-    style={{ display: "none" }}
-    id="fileInput"
-    />
+      {/* ✅ Upload Box with Drag & Drop */}
+      <div
+        onDrop={(e) => {
+          e.preventDefault()
+          const droppedFile = e.dataTransfer.files[0]
+          if (droppedFile) processFile(droppedFile)
+        }}
+        onDragOver={(e) => e.preventDefault()}
+        style={{
+          border: "2px dashed gray",
+          padding: "30px",
+          width: "400px",
+          textAlign: "center",
+          marginBottom: "20px"
+        }}
+      >
+        <input
+          type="file"
+          onChange={handleFileUpload}
+          style={{ display: "none" }}
+          id="fileInput"
+        />
 
-    <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
-      Drag & Drop or Click to Upload
-    </label>
-  </div>
+        <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
+          Drag & Drop or Click to Upload
+        </label>
+      </div>
 
       {/* File Info */}
       {file && (
