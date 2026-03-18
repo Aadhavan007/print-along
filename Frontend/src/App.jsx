@@ -94,18 +94,34 @@ function App() {
       <h2>Upload Document</h2>
 
       {/* Upload Box */}
-      <div style={{
-        border: "2px dashed gray",
-        padding: "30px",
-        width: "400px",
-        textAlign: "center",
-        marginBottom: "20px"
-      }}>
-        <input type="file" onChange={handleFileUpload} />
-        <p style={{ marginTop: "10px" }}>
-          Click to upload document
-        </p>
-      </div>
+    <div
+      onDrop={(e) => {
+      e.preventDefault()
+      const droppedFile = e.dataTransfer.files[0]
+      if (droppedFile) {
+      handleFileUpload({ target: { files: [droppedFile] } })
+      }
+    }}
+    onDragOver={(e) => e.preventDefault()}
+    style={{
+    border: "2px dashed gray",
+    padding: "30px",
+    width: "400px",
+    textAlign: "center",
+    marginBottom: "20px"
+    }}
+>
+    <input
+    type="file"
+    onChange={handleFileUpload}
+    style={{ display: "none" }}
+    id="fileInput"
+    />
+
+    <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
+      Drag & Drop or Click to Upload
+    </label>
+  </div>
 
       {/* File Info */}
       {file && (
