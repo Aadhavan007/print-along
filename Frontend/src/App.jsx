@@ -1,65 +1,18 @@
-import { useState, useEffect } from "react"
-import * as pdfjsLib from "pdfjs-dist"
-
-// ✅ Setup PDF worker
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+import { useState } from "react"
 
 function App() {
 
   const [file, setFile] = useState(null)
-  const [preview, setPreview] = useState(null)
-  const [qr, setQr] = useState(null)
-  const [pages, setPages] = useState(1)
+  const [fileData, setFileData] = useState(null)
   const [copies, setCopies] = useState(1)
 
-  const PRICE_PER_PAGE = 2
-
-  // ✅ Get real PDF page count
-  const getPdfPageCount = async (file) => {
-    const fileReader = new FileReader()
-
-    return new Promise((resolve, reject) => {
-      fileReader.onload = async function () {
-        try {
-          const typedArray = new Uint8Array(this.result)
-          const pdf = await pdfjsLib.getDocument(typedArray).promise
-          resolve(pdf.numPages)
-        } catch (error) {
-          reject(error)
-        }
-      }
-
-      fileReader.readAsArrayBuffer(file)
-    })
-  }
-
-  // ✅ MAIN FILE PROCESSOR (used by both click + drag)
+  // ✅ Upload handler (used by both click & drag)
   const processFile = async (selectedFile) => {
     if (!selectedFile) return
 
     setFile(selectedFile)
-    setQr(null) // reset QR on new upload
+    setFileData(null) // reset old data
 
-    // PDF handling
-    if (selectedFile.type === "application/pdf") {
-      const url = URL.createObjectURL(selectedFile)
-      setPreview(url)
-
-      try {
-        const count = await getPdfPageCount(selectedFile)
-        setPages(count)
-      } catch (err) {
-        console.error(err)
-        setPages(1)
-      }
-
-    } else {
-      setPreview(null)
-      setPages(1) // fallback for docx, etc.
-    }
-
-    // Upload to backend
     const formData = new FormData()
     formData.append("file", selectedFile)
 
@@ -73,30 +26,20 @@ function App() {
       )
 
       const data = await res.json()
-      setQr(data.qr_code_url)
+      setFileData(data)
 
     } catch (err) {
       console.error("Upload failed", err)
     }
   }
 
-  // ✅ CLICK upload
+  // ✅ Click upload
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0]
     processFile(selectedFile)
 
-    // reset input so same file can be re-uploaded
     e.target.value = null
   }
-
-  // ✅ CLEANUP preview memory
-  useEffect(() => {
-    return () => {
-      if (preview) URL.revokeObjectURL(preview)
-    }
-  }, [preview])
-
-  const totalAmount = pages * copies * PRICE_PER_PAGE
 
   return (
     <div style={{
@@ -111,7 +54,7 @@ function App() {
 
       <h2>Upload Document</h2>
 
-      {/* ✅ Upload Box with Drag & Drop */}
+      {/* ✅ Upload Box */}
       <div
         onDrop={(e) => {
           e.preventDefault()
@@ -139,19 +82,19 @@ function App() {
         </label>
       </div>
 
-      {/* File Info */}
+      {/* ✅ File Info */}
       {file && (
         <p style={{ marginBottom: "10px" }}>
           {file.name} ({(file.size / 1024).toFixed(2)} KB)
         </p>
       )}
 
-      {/* Preview */}
-      {preview && (
+      {/* ✅ Preview (from backend) */}
+      {fileData?.preview_url && (
         <div style={{ width: "80%", marginTop: "20px" }}>
           <h3 style={{ textAlign: "left" }}>Document Preview</h3>
           <iframe
-            src={preview}
+            src={fileData.preview_url}
             width="100%"
             height="500px"
             title="preview"
@@ -160,8 +103,8 @@ function App() {
         </div>
       )}
 
-      {/* Details */}
-      {file && (
+      {/* ✅ Details (ALL from backend) */}
+      {fileData && (
         <div style={{
           marginTop: "20px",
           width: "300px",
@@ -170,7 +113,7 @@ function App() {
 
           <h3>Details</h3>
 
-          <p>Pages: {pages}</p>
+          <p>Pages: {fileData.pages}</p>
 
           <div style={{ marginTop: "10px" }}>
             <label>Copies</label>
@@ -189,21 +132,21 @@ function App() {
           </div>
 
           <p style={{ marginTop: "10px" }}>
-            Price per page: ₹{PRICE_PER_PAGE}
+            Price per page: ₹{fileData.price_per_page}
           </p>
 
           <h3 style={{ marginTop: "10px" }}>
-            Total Amount: ₹{totalAmount}
+            Total Amount: ₹{fileData.total_amount * copies}
           </h3>
 
         </div>
       )}
 
-      {/* QR */}
-      {qr && (
+      {/* ✅ QR */}
+      {fileData?.qr_code_url && (
         <div style={{ marginTop: "30px", textAlign: "center" }}>
           <h3>Scan at Kiosk to Print</h3>
-          <img src={qr} width="250" />
+          <img src={fileData.qr_code_url} width="250" />
         </div>
       )}
 
