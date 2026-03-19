@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const axios = require("axios");
-const pdfParse = require("pdf-parse");
+const pdf = require("pdf-parse/lib/pdf-parse");
 const FormData = require("form-data");
 
 const router = express.Router();
@@ -9,7 +9,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const API_KEY = process.env.CLOUDCONVERT_API_KEY;
 
-// ✅ MOVE IT HERE (TOP LEVEL)
+// ✅ Test route
 router.get("/test", (req, res) => {
   res.send("API route working");
 });
@@ -22,6 +22,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    // 🔥 STEP 1: Create CloudConvert job
     const job = await axios.post(
       "https://api.cloudconvert.com/v2/jobs",
       {
@@ -47,6 +48,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     const uploadTask = job.data.data.tasks.find(t => t.name === "upload");
 
+    // 🔥 STEP 2: Upload file
     const form = new FormData();
 
     Object.entries(uploadTask.result.form.parameters).forEach(([k, v]) => {
@@ -59,6 +61,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       headers: form.getHeaders()
     });
 
+    // 🔥 STEP 3: Wait for conversion
     let finishedJob;
 
     while (true) {
@@ -84,23 +87,25 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const exportTask = finishedJob.tasks.find(t => t.name === "export");
     const pdfUrl = exportTask.result.files[0].url;
 
+    // 🔥 STEP 4: Download PDF
     const pdfResponse = await axios.get(pdfUrl, {
       responseType: "arraybuffer"
     });
 
     const pdfBuffer = pdfResponse.data;
 
-    const data = await pdfParse(pdfBuffer);
+    // 🔥 STEP 5: Count pages
+    const data = await pdf(pdfBuffer);
 
     res.json({
       pages: data.numpages,
       pdfUrl: pdfUrl
     });
 
-} catch (err) {
-  console.error("FULL ERROR:", err.response?.data || err.message);
-  res.status(500).json({ error: "Upload/Conversion failed" });
-}
+  } catch (err) {
+    console.error("FULL ERROR:", err.response?.data || err.message);
+    res.status(500).json({ error: "Upload/Conversion failed" });
+  }
 });
 
 module.exports = router;
