@@ -18,7 +18,11 @@ const drive = google.drive({ version: "v3", auth });
 // 📤 UPLOAD FILE TO DRIVE
 async function uploadFile(file) {
   const bufferStream = new stream.PassThrough();
-  bufferStream.end(file.buffer);
+  const buffer = Buffer.isBuffer(file.buffer)
+  ? file.buffer
+  : Buffer.from(file.buffer);
+
+bufferStream.end(buffer);
 
   const response = await drive.files.create({
     requestBody: {
