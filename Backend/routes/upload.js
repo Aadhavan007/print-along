@@ -9,6 +9,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const API_KEY = process.env.CLOUDCONVERT_API_KEY;
 
+// ✅ MOVE IT HERE (TOP LEVEL)
+router.get("/test", (req, res) => {
+  res.send("API route working");
+});
+
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -17,14 +22,11 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // 🔥 STEP 1: Create CloudConvert job
     const job = await axios.post(
       "https://api.cloudconvert.com/v2/jobs",
       {
         tasks: {
-          upload: {
-            operation: "import/upload"
-          },
+          upload: { operation: "import/upload" },
           convert: {
             operation: "convert",
             input: "upload",
@@ -42,13 +44,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         }
       }
     );
-    router.get("/test", (req, res) => {
-    res.send("API route working");
-    });
 
     const uploadTask = job.data.data.tasks.find(t => t.name === "upload");
 
-    // 🔥 STEP 2: Upload file
     const form = new FormData();
 
     Object.entries(uploadTask.result.form.parameters).forEach(([k, v]) => {
@@ -61,7 +59,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       headers: form.getHeaders()
     });
 
-    // 🔥 STEP 3: Wait for conversion
     let finishedJob;
 
     while (true) {
@@ -87,14 +84,12 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const exportTask = finishedJob.tasks.find(t => t.name === "export");
     const pdfUrl = exportTask.result.files[0].url;
 
-    // 🔥 STEP 4: Download PDF
     const pdfResponse = await axios.get(pdfUrl, {
       responseType: "arraybuffer"
     });
 
     const pdfBuffer = pdfResponse.data;
 
-    // 🔥 STEP 5: Count pages
     const data = await pdf(pdfBuffer);
 
     res.json({
