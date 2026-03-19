@@ -1,17 +1,23 @@
 const express = require("express");
-const router = express.Router();
-
 const Job = require("../models/Job");
+
+const router = express.Router();
 
 router.get("/:job_id", async (req, res) => {
   try {
-    const job = await Job.findOne({ job_id: req.params.job_id });
+    const jobId = req.params.job_id;
+
+    const job = await Job.findOne({ job_id: jobId });
 
     if (!job) {
       return res.status(404).send("Job not found");
     }
 
-    res.redirect(job.pdfUrl);
+    const fileUrl = job.file_url;
+
+    const downloadUrl = fileUrl.replace("/upload/", "/upload/fl_attachment/");
+
+    res.redirect(downloadUrl);
 
   } catch (error) {
     console.error(error);

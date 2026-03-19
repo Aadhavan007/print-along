@@ -1,11 +1,18 @@
 const mongoose = require("mongoose");
 
 const jobSchema = new mongoose.Schema({
-  job_id: String,
-  pdfUrl: String,
+  job_id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  file_url: {
+    type: String,
+    required: true
+  },
   pages: Number,
-  totalAmount: Number,
-  createdAt: {
+  total_amount: Number,
+  created_at: {
     type: Date,
     default: Date.now
   }

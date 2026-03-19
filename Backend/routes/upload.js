@@ -3,10 +3,9 @@ const multer = require("multer");
 const axios = require("axios");
 const pdf = require("pdf-parse");
 const FormData = require("form-data");
-const Job = require("../models/Job");
 
+const Job = require("../models/Job");
 const generateQR = require("../services/qrService");
-const jobs = require("../store/jobStore");
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -101,29 +100,30 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     // 🔥 STEP 5: Count pages
     const data = await pdf(pdfBuffer);
 
-    // 💰 PRICE CALCULATION
+    // 💰 PRICE
     const pricePerPage = 2;
     const totalAmount = data.numpages * pricePerPage;
 
-    // 🆔 CREATE JOB
+    // 🆔 JOB ID
     const jobId = Date.now().toString();
 
     // 🔗 PRINT URL
     const printUrl = `${req.protocol}://${req.get("host")}/print/${jobId}`;
 
-    // 📱 GENERATE QR
+    // 📱 QR CODE
     const qrCode = await generateQR(printUrl);
 
-    // 🧠 STORE JOB
+    // 🧠 SAVE TO DB (FIXED FIELD NAMES)
     await Job.create({
-    job_id: jobId,
-    pdfUrl,
-    pages: data.numpages,
-    totalAmount
+      job_id: jobId,
+      file_url: pdfUrl,
+      pages: data.numpages,
+      total_amount: totalAmount
     });
 
-    // 🚀 FINAL RESPONSE
+    // 🚀 RESPONSE
     res.json({
+      jobId,
       pages: data.numpages,
       pricePerPage,
       totalAmount,
