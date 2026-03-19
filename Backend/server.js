@@ -1,27 +1,25 @@
-const express = require("express")
-const cors = require("cors")
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
 
-const connectDB = require("./config/db")
+const app = express();
 
-const uploadRoute = require("./routes/upload")
-const printRoute = require("./routes/print")
+// middleware
+app.use(cors());
+app.use(express.json());
 
-const app = express()
+// routes
+const uploadRoute = require("./routes/upload");
+app.use("/api", uploadRoute);
 
-connectDB()
-
-app.use(cors())
-app.use(express.json())
-
-app.use("/upload", uploadRoute)
-app.use("/print", printRoute)
-
+// test route
 app.get("/", (req, res) => {
-  res.send("PrintAlong API running")
-})
+  res.send("PrintAlong API running");
+});
 
-const PORT = process.env.PORT || 5000
+// port
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});

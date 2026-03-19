@@ -1,48 +1,108 @@
-const express = require("express")
-const multer = require("multer")
-const { uploadToCloudinary } = require("../services/cloudinaryService")
-const generateQR = require("../services/qrService")
-const Job = require("../models/Job")
+const express = require("express");
+const multer = require("multer");
+const axios = require("axios");
+const pdf = require("pdf-parse");
+const FormData = require("form-data");
 
-const router = express.Router()
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-const storage = multer.memoryStorage()
-const upload = multer({ storage })
+const API_KEY = process.env.CLOUDCONVERT_API_KEY;
 
-router.post("/", upload.single("file"), async (req, res) => {
-
+router.post("/upload", upload.single("file"), async (req, res) => {
   try {
+    const file = req.file;
 
-    const fileBuffer = req.file.buffer
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
 
-    const fileUrl = await uploadToCloudinary(
-      fileBuffer,
-      req.file.originalname
-    )
+    // 🔥 STEP 1: Create CloudConvert job
+    const job = await axios.post(
+      "https://api.cloudconvert.com/v2/jobs",
+      {
+        tasks: {
+          upload: {
+            operation: "import/upload"
+          },
+          convert: {
+            operation: "convert",
+            input: "upload",
+            output_format: "pdf"
+          },
+          export: {
+            operation: "export/url",
+            input: "convert"
+          }
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${API_KEY}`
+        }
+      }
+    );
 
-    const jobId = Date.now().toString()
+    const uploadTask = job.data.data.tasks.find(t => t.name === "upload");
 
-    await Job.create({
-      job_id: jobId,
-      file_url: fileUrl
-    })
+    // 🔥 STEP 2: Upload file
+    const form = new FormData();
 
-    const printUrl = `https://print-along-api.onrender.com/print/${jobId}`
+    Object.entries(uploadTask.result.form.parameters).forEach(([k, v]) => {
+      form.append(k, v);
+    });
 
-    const qrCode = await generateQR(printUrl)
+    form.append("file", file.buffer, file.originalname);
+
+    await axios.post(uploadTask.result.form.url, form, {
+      headers: form.getHeaders()
+    });
+
+    // 🔥 STEP 3: Wait for conversion
+    let finishedJob;
+
+    while (true) {
+      const resJob = await axios.get(
+        `https://api.cloudconvert.com/v2/jobs/${job.data.data.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${API_KEY}`
+          }
+        }
+      );
+
+      finishedJob = resJob.data.data;
+
+      if (finishedJob.status === "finished") break;
+      if (finishedJob.status === "error") {
+        throw new Error("Conversion failed");
+      }
+
+      await new Promise(r => setTimeout(r, 2000));
+    }
+
+    const exportTask = finishedJob.tasks.find(t => t.name === "export");
+    const pdfUrl = exportTask.result.files[0].url;
+
+    // 🔥 STEP 4: Download PDF
+    const pdfResponse = await axios.get(pdfUrl, {
+      responseType: "arraybuffer"
+    });
+
+    const pdfBuffer = pdfResponse.data;
+
+    // 🔥 STEP 5: Count pages
+    const data = await pdf(pdfBuffer);
 
     res.json({
-      job_id: jobId,
-      qr_code_url: qrCode
-    })
+      pages: data.numpages,
+      pdfUrl: pdfUrl
+    });
 
-  } catch (error) {
-
-    console.error(error)
-    res.status(500).json({ error: "Upload failed" })
-
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Upload/Conversion failed" });
   }
+});
 
-})
-
-module.exports = router
+module.exports = router;
