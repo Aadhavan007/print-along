@@ -42,6 +42,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         }
       }
     );
+    router.get("/test", (req, res) => {
+    res.send("API route working");
+    });
 
     const uploadTask = job.data.data.tasks.find(t => t.name === "upload");
 
