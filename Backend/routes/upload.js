@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const axios = require("axios");
-const pdf = require("pdf-parse");
+const pdfParse = require("pdf-parse");
 const FormData = require("form-data");
 
 const router = express.Router();
@@ -90,7 +90,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     const pdfBuffer = pdfResponse.data;
 
-    const data = await pdf(pdfBuffer);
+    const data = await pdfParse(pdfBuffer);
 
     res.json({
       pages: data.numpages,
