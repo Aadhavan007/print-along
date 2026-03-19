@@ -37,7 +37,7 @@ async function uploadFile(file) {
 
 // 🔄 CONVERT TO PDF + RETURN DOWNLOAD LINK
 async function convertToPDF(fileId) {
-
+  // 1. Convert to PDF (ArrayBuffer)
   const res = await drive.files.export(
     {
       fileId,
@@ -46,10 +46,11 @@ async function convertToPDF(fileId) {
     { responseType: "arraybuffer" }
   );
 
-  const stream = require("stream");
+  // 2. Convert ArrayBuffer → Buffer → Stream
   const bufferStream = new stream.PassThrough();
-  bufferStream.end(res.data);
+  bufferStream.end(Buffer.from(res.data));
 
+  // 3. Upload converted PDF back to Drive
   const uploadedPDF = await drive.files.create({
     requestBody: {
       name: "converted.pdf",
@@ -63,6 +64,7 @@ async function convertToPDF(fileId) {
 
   const pdfFileId = uploadedPDF.data.id;
 
+  // 4. Make it public
   await drive.permissions.create({
     fileId: pdfFileId,
     requestBody: {
@@ -71,8 +73,8 @@ async function convertToPDF(fileId) {
     }
   });
 
+  // 5. Return public download link
   return `https://drive.google.com/uc?id=${pdfFileId}&export=download`;
 }
-
 
 module.exports = { uploadFile, convertToPDF };
