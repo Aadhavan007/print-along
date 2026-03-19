@@ -97,10 +97,10 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       pdfUrl: pdfUrl
     });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Upload/Conversion failed" });
-  }
+} catch (err) {
+  console.error("FULL ERROR:", err.response?.data || err.message);
+  res.status(500).json({ error: "Upload/Conversion failed" });
+}
 });
 
 module.exports = router;
