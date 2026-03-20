@@ -2,16 +2,12 @@ const { google } = require("googleapis");
 const stream = require("stream");
 
 // 🔐 AUTH
+const credentials = JSON.parse(
+  Buffer.from(process.env.GOOGLE_CREDS_BASE64, "base64").toString()
+);
+
 const auth = new google.auth.GoogleAuth({
-  credentials: {
-    type: "service_account",
-    project_id: process.env.GOOGLE_PROJECT_ID,
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY
-      .replace(/\\n/g, "\n")
-      .replace(/\r/g, "")
-      .trim()
-  },
+  credentials,
   scopes: ["https://www.googleapis.com/auth/drive"]
 });
 
