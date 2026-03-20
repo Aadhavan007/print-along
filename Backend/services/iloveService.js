@@ -5,8 +5,10 @@ const FormData = require("form-data");
 async function startTask() {
   try {
     const res = await axios.post(
-      "https://api.ilovepdf.com/v1/start/officepdf",
-      {},
+      "https://api.ilovepdf.com/v1/start",
+      {
+        tool: "officepdf"
+      },
       {
         headers: {
           Authorization: `Bearer ${process.env.ILOVE_API_KEY}`
@@ -14,7 +16,7 @@ async function startTask() {
       }
     );
 
-    return res.data; // { server, task }
+    return res.data;
   } catch (err) {
     console.error("iLove START ERROR:", err.response?.data || err.message);
     throw new Error("iLove start task failed");
