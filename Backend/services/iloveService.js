@@ -4,12 +4,12 @@ const FormData = require("form-data");
 // 🔹 STEP 1: START TASK (FIXED ENDPOINT)
 async function startTask() {
   try {
-    const res = await axios.get(
-      "https://api.ilovepdf.com/v1/start/officepdf",
+    const res = await axios.post(
+      "https://api.ilovepdf.com/v1/start/officepdf", // ✅ correct endpoint
+      {}, // ✅ empty body (IMPORTANT)
       {
         headers: {
-          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`,
-          "Content-Type": "application/json" // ✅ ADD THIS
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`
         }
       }
     );
