@@ -5,7 +5,7 @@ const FormData = require("form-data");
 async function startTask() {
   try {
     const params = new URLSearchParams();
-    params.append("tool", "officepdf");
+    params.append("tool", "office_to_pdf"); // ✅ FIXED
 
     const res = await axios.post(
       "https://api.ilovepdf.com/v1/start",
