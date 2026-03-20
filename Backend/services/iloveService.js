@@ -4,12 +4,16 @@ const FormData = require("form-data");
 // 🔹 STEP 1: START TASK (FIXED ENDPOINT)
 async function startTask() {
   try {
+    const form = new URLSearchParams();
+    form.append("tool", "officepdf"); // ✅ NOT office_to_pdf
+
     const res = await axios.post(
-      "https://api.ilovepdf.com/v1/start/officepdf", // ✅ correct endpoint
-      {}, // ✅ empty body (IMPORTANT)
+      "https://api.ilovepdf.com/v1/start",
+      form,
       {
         headers: {
-          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`,
+          "Content-Type": "application/x-www-form-urlencoded"
         }
       }
     );
