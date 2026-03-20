@@ -13,14 +13,11 @@ router.get("/:job_id", async (req, res) => {
       return res.status(404).send("Job not found");
     }
 
-    const fileUrl = job.file_url;
-
-    const downloadUrl = res.redirect(fileUrl);
-
-    res.redirect(downloadUrl);
+    // ✅ Direct redirect to file
+    return res.redirect(job.file_url);
 
   } catch (error) {
-    console.error(error);
+    console.error("PRINT ERROR:", error);
     res.status(500).send("Server error");
   }
 });
