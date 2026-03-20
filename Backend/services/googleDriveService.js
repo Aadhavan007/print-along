@@ -25,15 +25,16 @@ async function uploadFile(buffer, originalname, mimetype) {
   bufferStream.end(safeBuffer);
 
   const response = await drive.files.create({
-    requestBody: {
-      name: originalname,
-      mimeType: mimetype
-    },
-    media: {
-      mimeType: mimetype,
-      body: bufferStream
-    }
-  });
+  requestBody: {
+    name: originalname,
+    mimeType: mimetype,
+    parents: ["1aHCZBBxZGEb_oJg9MWnBxKjSOxv-xq48"] // ✅ YOUR FOLDER ID
+  },
+  media: {
+    mimeType: mimetype,
+    body: bufferStream
+  }
+});
 
   return response.data.id;
 }
