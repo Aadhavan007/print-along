@@ -39,47 +39,64 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     let pages = 1;
     let pdfBuffer = null;
+    let finalFileName = file.originalname;
 
     // 🟢 PDF
     if (fileType === "pdf") {
       const data = await pdf(file.buffer);
       pages = data.numpages;
       pdfBuffer = file.buffer;
+      finalFileName = file.originalname;
     }
 
-    // 🟢 PPT (basic)
+    // 🟢 PPT (basic fallback)
     else if (fileType === "ppt") {
       const content = file.buffer.toString("binary");
       const matches = content.match(/slide/g);
       pages = matches ? matches.length : 1;
+      finalFileName = file.originalname;
     }
 
     // 🟢 IMAGE
     else if (fileType === "image") {
       pages = 1;
+      finalFileName = file.originalname;
     }
 
     // 🔴 WORD → iLoveAPI
     else if (fileType === "word") {
-      pdfBuffer = await convertWithILove(file);
-      const data = await pdf(pdfBuffer);
-      pages = data.numpages;
+      try {
+        pdfBuffer = await convertWithILove(file);
+        const data = await pdf(pdfBuffer);
+        pages = data.numpages;
+        finalFileName = file.originalname.replace(/\.\w+$/, ".pdf");
+      } catch (err) {
+        console.error("Word conversion failed:", err.message);
+        return res.status(500).json({ error: "Word conversion failed" });
+      }
     }
 
     // 🔴 EXCEL → CloudConvert
     else if (fileType === "excel") {
-      pdfBuffer = await convertWithCloudConvert(file);
-      const data = await pdf(pdfBuffer);
-      pages = data.numpages;
+      try {
+        pdfBuffer = await convertWithCloudConvert(file);
+        const data = await pdf(pdfBuffer);
+        pages = data.numpages;
+        finalFileName = file.originalname.replace(/\.\w+$/, ".pdf");
+      } catch (err) {
+        console.error("Excel conversion failed:", err.message);
+        return res.status(500).json({ error: "Excel conversion failed" });
+      }
     }
 
     else {
       return res.status(400).json({ error: "Unsupported file type" });
     }
 
-    // ☁️ Upload FINAL FILE (PDF or original) to Cloudinary
+    // ☁️ Upload FINAL FILE
     const finalBuffer = pdfBuffer || file.buffer;
-    const fileUrl = await uploadToCloudinary(finalBuffer, file.originalname);
+
+    const fileUrl = await uploadToCloudinary(finalBuffer, finalFileName);
 
     // 💰 PRICE
     const pricePerPage = 2;
@@ -88,8 +105,8 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     // 🆔 JOB ID
     const jobId = Date.now().toString();
 
-    // 🔗 PRINT URL
-    const printUrl = `${req.protocol}://${req.get("host")}/print/${jobId}`;
+    // 🔗 ALWAYS HTTPS (IMPORTANT)
+    const printUrl = `https://${req.get("host")}/print/${jobId}`;
 
     // 📱 QR
     const qrCode = await generateQR(printUrl);
@@ -116,5 +133,4 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     res.status(500).json({ error: "Processing failed" });
   }
 });
-
 module.exports = router;
