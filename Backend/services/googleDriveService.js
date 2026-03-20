@@ -1,13 +1,16 @@
 const { google } = require("googleapis");
 const stream = require("stream");
 
-// 🔐 AUTH (from ENV)
+// 🔐 AUTH
 const auth = new google.auth.GoogleAuth({
   credentials: {
     type: "service_account",
     project_id: process.env.GOOGLE_PROJECT_ID,
     client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n")
+    private_key: process.env.GOOGLE_PRIVATE_KEY
+      .replace(/\\n/g, "\n")
+      .replace(/\r/g, "")
+      .trim()
   },
   scopes: ["https://www.googleapis.com/auth/drive"]
 });
@@ -16,21 +19,22 @@ const drive = google.drive({ version: "v3", auth });
 
 
 // 📤 UPLOAD FILE TO DRIVE
-async function uploadFile(file) {
+async function uploadFile(buffer, originalname, mimetype) {
   const bufferStream = new stream.PassThrough();
-  const buffer = Buffer.isBuffer(file.buffer)
-  ? file.buffer
-  : Buffer.from(file.buffer);
 
-bufferStream.end(buffer);
+  const safeBuffer = Buffer.isBuffer(buffer)
+    ? buffer
+    : Buffer.from(buffer);
+
+  bufferStream.end(safeBuffer);
 
   const response = await drive.files.create({
     requestBody: {
-      name: file.originalname,
-      mimeType: file.mimetype
+      name: originalname,
+      mimeType: mimetype
     },
     media: {
-      mimeType: file.mimetype,
+      mimeType: mimetype,
       body: bufferStream
     }
   });
@@ -39,7 +43,7 @@ bufferStream.end(buffer);
 }
 
 
-// 🔄 CONVERT TO PDF + RETURN DOWNLOAD LINK
+// 🔄 CONVERT TO PDF → RETURN BUFFER + LINK
 async function convertToPDF(fileId) {
   // 1. Convert to PDF (ArrayBuffer)
   const res = await drive.files.export(
@@ -50,11 +54,10 @@ async function convertToPDF(fileId) {
     { responseType: "arraybuffer" }
   );
 
-  // 2. Convert ArrayBuffer → Buffer → Stream
+  // 2. Upload converted PDF
   const bufferStream = new stream.PassThrough();
   bufferStream.end(Buffer.from(res.data));
 
-  // 3. Upload converted PDF back to Drive
   const uploadedPDF = await drive.files.create({
     requestBody: {
       name: "converted.pdf",
@@ -68,7 +71,7 @@ async function convertToPDF(fileId) {
 
   const pdfFileId = uploadedPDF.data.id;
 
-  // 4. Make it public
+  // 3. Make public
   await drive.permissions.create({
     fileId: pdfFileId,
     requestBody: {
@@ -77,8 +80,16 @@ async function convertToPDF(fileId) {
     }
   });
 
-  // 5. Return public download link
-  return `https://drive.google.com/uc?id=${pdfFileId}&export=download`;
+  // 4. Get buffer for page count
+  const pdfRes = await drive.files.get(
+    { fileId: pdfFileId, alt: "media" },
+    { responseType: "arraybuffer" }
+  );
+
+  return {
+    buffer: Buffer.from(pdfRes.data),
+    url: `https://drive.google.com/uc?id=${pdfFileId}&export=download`
+  };
 }
 
 module.exports = { uploadFile, convertToPDF };

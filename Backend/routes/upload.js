@@ -9,11 +9,6 @@ const generateQR = require("../services/qrService");
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ test route
-router.get("/test", (req, res) => {
-  res.send("API route working");
-});
-
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -22,18 +17,20 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // 🔥 STEP 1: Upload to Google Drive
+    console.log("📂 File received:", file.originalname);
+
+    // ✅ STEP 1: Upload original file
     const fileId = await uploadFile(
       file.buffer,
       file.originalname,
       file.mimetype
     );
 
-    // 🔥 STEP 2: Convert to PDF
-    const pdfBuffer = await convertToPDF(fileId);
+    // ✅ STEP 2: Convert to PDF
+    const pdfResult = await convertToPDF(fileId);
 
-    // 🔥 STEP 3: Count pages
-    const data = await pdf(pdfBuffer);
+    // ✅ STEP 3: Count pages
+    const data = await pdf(pdfResult.buffer);
 
     // 💰 PRICE
     const pricePerPage = 2;
@@ -51,7 +48,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     // 🧠 SAVE TO DB
     await Job.create({
       job_id: jobId,
-      file_url: "generated-from-google-drive",
+      file_url: pdfResult.url,
       pages: data.numpages,
       total_amount: totalAmount
     });
@@ -67,7 +64,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     });
 
   } catch (err) {
-    console.error("FULL ERROR:", err.message);
+    console.error("FULL ERROR:", err);
     res.status(500).json({ error: "Upload/Conversion failed" });
   }
 });

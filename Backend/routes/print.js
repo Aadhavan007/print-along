@@ -15,7 +15,7 @@ router.get("/:job_id", async (req, res) => {
 
     const fileUrl = job.file_url;
 
-    const downloadUrl = fileUrl.replace("/upload/", "/upload/fl_attachment/");
+    const downloadUrl = res.redirect(fileUrl);
 
     res.redirect(downloadUrl);
 
