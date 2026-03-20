@@ -28,12 +28,13 @@ async function uploadFile(buffer, originalname, mimetype) {
   requestBody: {
     name: originalname,
     mimeType: mimetype,
-    parents: ["1aHCZBBxZGEb_oJg9MWnBxKjSOxv-xq48"] // ✅ YOUR FOLDER ID
+    parents: ["1aHCZBBxZGEb_oJg9MWnBxKjSOxv-xq48"]
   },
   media: {
     mimeType: mimetype,
     body: bufferStream
-  }
+  },
+  supportsAllDrives: true   // 🔥 IMPORTANT
 });
 
   return response.data.id;
