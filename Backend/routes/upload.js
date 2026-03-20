@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const pdf = require("pdf-parse");
+const AdmZip = require("adm-zip");
 
 const Job = require("../models/Job");
 const generateQR = require("../services/qrService");
@@ -49,13 +50,24 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       finalFileName = file.originalname;
     }
 
-    // 🟢 PPT (basic fallback)
-    else if (fileType === "ppt") {
-      const content = file.buffer.toString("binary");
-      const matches = content.match(/slide/g);
-      pages = matches ? matches.length : 1;
-      finalFileName = file.originalname;
-    }
+    // 🟢 PPT (ACCURATE)
+else if (fileType === "ppt") {
+  try {
+    const zip = new AdmZip(file.buffer);
+    const entries = zip.getEntries();
+
+    const slideFiles = entries.filter(entry =>
+      entry.entryName.startsWith("ppt/slides/slide")
+    );
+
+    pages = slideFiles.length || 1;
+    finalFileName = file.originalname;
+
+  } catch (err) {
+    console.error("PPT parsing failed:", err.message);
+    pages = 1; // fallback
+  }
+}
 
     // 🟢 IMAGE
     else if (fileType === "image") {
