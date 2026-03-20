@@ -1,55 +1,98 @@
 const axios = require("axios");
 const FormData = require("form-data");
 
-async function convertWithILove(file) {
+// 🔹 STEP 1: START TASK
+async function startTask() {
   try {
-    const API_KEY = process.env.ILOVE_API_KEY;
-
-    // 🟢 STEP 1: Start task
-    const startRes = await axios.post(
-      "https://api.ilovepdf.com/v1/start/officepdf",
+    const res = await axios.post(
+      "https://api.iloveapi.com/v1/start/officepdf",
       {},
       {
         headers: {
-          Authorization: `Bearer ${API_KEY}`
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`
         }
       }
     );
 
-    const { task, server } = startRes.data;
+    return res.data; // { server, task }
+  } catch (err) {
+    console.error("iLove START ERROR:", err.response?.data || err.message);
+    throw new Error("iLove start task failed");
+  }
+}
 
-    // 🟢 STEP 2: Upload file
+// 🔹 STEP 2: UPLOAD FILE
+async function uploadFile(server, task, file) {
+  try {
     const form = new FormData();
-    form.append("task", task);
+
     form.append("file", file.buffer, file.originalname);
+    form.append("task", task);
 
-    await axios.post(`${server}/v1/upload`, form, {
-      headers: form.getHeaders()
-    });
-
-    // 🟢 STEP 3: Process conversion
-    await axios.post(
-      `${server}/v1/process`,
-      { task },
+    const res = await axios.post(
+      `${server}/v1/upload`,
+      form,
       {
-        headers: {
-          Authorization: `Bearer ${API_KEY}`
-        }
+        headers: form.getHeaders()
       }
     );
 
-    // 🟢 STEP 4: Download PDF
-    const downloadRes = await axios.get(
+    return res.data;
+  } catch (err) {
+    console.error("iLove UPLOAD ERROR:", err.response?.data || err.message);
+    throw new Error("iLove upload failed");
+  }
+}
+
+// 🔹 STEP 3: PROCESS FILE
+async function processTask(server, task) {
+  try {
+    const res = await axios.post(
+      `${server}/v1/process`,
+      {
+        task
+      }
+    );
+
+    return res.data;
+  } catch (err) {
+    console.error("iLove PROCESS ERROR:", err.response?.data || err.message);
+    throw new Error("iLove process failed");
+  }
+}
+
+// 🔹 STEP 4: DOWNLOAD PDF
+async function downloadFile(server, task) {
+  try {
+    const res = await axios.get(
       `${server}/v1/download/${task}`,
       {
         responseType: "arraybuffer"
       }
     );
 
-    return Buffer.from(downloadRes.data);
+    return Buffer.from(res.data);
+  } catch (err) {
+    console.error("iLove DOWNLOAD ERROR:", err.response?.data || err.message);
+    throw new Error("iLove download failed");
+  }
+}
 
-  } catch (error) {
-    console.error("iLoveAPI ERROR:", error.response?.data || error.message);
+// 🔥 MAIN FUNCTION
+async function convertWithILove(file) {
+  try {
+    const { server, task } = await startTask();
+
+    await uploadFile(server, task, file);
+
+    await processTask(server, task);
+
+    const pdfBuffer = await downloadFile(server, task);
+
+    return pdfBuffer;
+
+  } catch (err) {
+    console.error("iLove FULL ERROR:", err.message);
     throw new Error("iLove conversion failed");
   }
 }
