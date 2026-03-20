@@ -1,19 +1,14 @@
 const axios = require("axios");
 const FormData = require("form-data");
 
-// 🔹 STEP 1: START TASK
+// 🔹 STEP 1: START TASK (FIXED ENDPOINT)
 async function startTask() {
   try {
-    const params = new URLSearchParams();
-    params.append("tool", "office_to_pdf"); // ✅ FIXED
-
-    const res = await axios.post(
-      "https://api.ilovepdf.com/v1/start",
-      params,
+    const res = await axios.get(
+      "https://api.ilovepdf.com/v1/start/officepdf", // ✅ CORRECT
       {
         headers: {
-          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`,
-          "Content-Type": "application/x-www-form-urlencoded"
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`
         }
       }
     );
@@ -37,7 +32,10 @@ async function uploadFile(server, task, file) {
       `${server}/v1/upload`,
       form,
       {
-        headers: form.getHeaders()
+        headers: {
+          ...form.getHeaders(),
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}` // ✅ IMPORTANT
+        }
       }
     );
 
@@ -55,6 +53,11 @@ async function processTask(server, task) {
       `${server}/v1/process`,
       {
         task
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}` // ✅ IMPORTANT
+        }
       }
     );
 
@@ -71,7 +74,10 @@ async function downloadFile(server, task) {
     const res = await axios.get(
       `${server}/v1/download/${task}`,
       {
-        responseType: "arraybuffer"
+        responseType: "arraybuffer",
+        headers: {
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}` // ✅ IMPORTANT
+        }
       }
     );
 
