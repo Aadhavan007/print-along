@@ -5,10 +5,11 @@ const FormData = require("form-data");
 async function startTask() {
   try {
     const res = await axios.get(
-      "https://api.ilovepdf.com/v1/start/officepdf", // ✅ CORRECT
+      "https://api.ilovepdf.com/v1/start/officepdf",
       {
         headers: {
-          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`
+          Authorization: `Bearer ${process.env.ILOVE_API_KEY}`,
+          "Content-Type": "application/json" // ✅ ADD THIS
         }
       }
     );
