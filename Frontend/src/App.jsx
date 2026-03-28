@@ -10,7 +10,7 @@ function App() {
   const processFile = async (selectedFile) => {
     if (!selectedFile) return
 
-    // ✅ Restrict to PDF
+    // ✅ Only PDF
     if (selectedFile.type !== "application/pdf") {
       alert("Only PDF files are supported")
       return
@@ -99,22 +99,28 @@ function App() {
 
             <div className="row">
               <span>Pages</span>
-              <strong>{fileData.pages}</strong>
+              <div className="value">
+                <strong>{fileData.pages}</strong>
+              </div>
             </div>
 
             <div className="row">
               <span>Price / page</span>
-              <strong>₹{fileData.pricePerPage}</strong>
+              <div className="value">
+                <strong>₹{fileData.pricePerPage}</strong>
+              </div>
             </div>
 
             <div className="row">
               <span>Copies</span>
-              <input
-                type="number"
-                min="1"
-                value={copies}
-                onChange={(e) => setCopies(Number(e.target.value))}
-              />
+              <div className="value">
+                <input
+                  type="number"
+                  min="1"
+                  value={copies}
+                  onChange={(e) => setCopies(Number(e.target.value))}
+                />
+              </div>
             </div>
 
             <div className="total">
