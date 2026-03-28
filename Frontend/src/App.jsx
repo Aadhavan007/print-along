@@ -5,20 +5,27 @@ function App() {
   const [file, setFile] = useState(null)
   const [fileData, setFileData] = useState(null)
   const [copies, setCopies] = useState(1)
+  const [loading, setLoading] = useState(false)
 
-  // ✅ Upload handler (used by both click & drag)
   const processFile = async (selectedFile) => {
     if (!selectedFile) return
 
+    // ✅ Restrict to PDF
+    if (selectedFile.type !== "application/pdf") {
+      alert("Only PDF files are supported")
+      return
+    }
+
     setFile(selectedFile)
-    setFileData(null) // reset old data
+    setFileData(null)
+    setLoading(true)
 
     const formData = new FormData()
     formData.append("file", selectedFile)
 
     try {
       const res = await fetch(
-        "https://print-along-api.onrender.com/upload",
+        "https://print-along-api.onrender.com/api/upload",
         {
           method: "POST",
           body: formData
@@ -30,14 +37,15 @@ function App() {
 
     } catch (err) {
       console.error("Upload failed", err)
+      alert("Upload failed")
+    } finally {
+      setLoading(false)
     }
   }
 
-  // ✅ Click upload
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0]
     processFile(selectedFile)
-
     e.target.value = null
   }
 
@@ -52,9 +60,9 @@ function App() {
       alignItems: "center"
     }}>
 
-      <h2>Upload Document</h2>
+      <h2>PrintAlong 🚀</h2>
 
-      {/* ✅ Upload Box */}
+      {/* Upload Box */}
       <div
         onDrop={(e) => {
           e.preventDefault()
@@ -72,38 +80,28 @@ function App() {
       >
         <input
           type="file"
+          accept=".pdf"
           onChange={handleFileUpload}
           style={{ display: "none" }}
           id="fileInput"
         />
 
         <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
-          Drag & Drop or Click to Upload
+          Drag & Drop or Click to Upload PDF
         </label>
       </div>
 
-      {/* ✅ File Info */}
-      {file && (
-        <p style={{ marginBottom: "10px" }}>
+      {/* Loading */}
+      {loading && <p>Processing your file...</p>}
+
+      {/* File Info */}
+      {file && !loading && (
+        <p>
           {file.name} ({(file.size / 1024).toFixed(2)} KB)
         </p>
       )}
 
-      {/* ✅ Preview (from backend) */}
-      {fileData?.preview_url && (
-        <div style={{ width: "80%", marginTop: "20px" }}>
-          <h3 style={{ textAlign: "left" }}>Document Preview</h3>
-          <iframe
-            src={fileData.preview_url}
-            width="100%"
-            height="500px"
-            title="preview"
-            style={{ border: "1px solid gray" }}
-          />
-        </div>
-      )}
-
-      {/* ✅ Details (ALL from backend) */}
+      {/* Details */}
       {fileData && (
         <div style={{
           marginTop: "20px",
@@ -132,21 +130,27 @@ function App() {
           </div>
 
           <p style={{ marginTop: "10px" }}>
-            Price per page: ₹{fileData.price_per_page}
+            Price per page: ₹{fileData.pricePerPage}
           </p>
 
           <h3 style={{ marginTop: "10px" }}>
-            Total Amount: ₹{fileData.total_amount * copies}
+            Total Amount: ₹{fileData.totalAmount * copies}
           </h3>
+
+          <p style={{ marginTop: "10px" }}>
+            <a href={fileData.printUrl} target="_blank">
+              Open Print Link
+            </a>
+          </p>
 
         </div>
       )}
 
-      {/* ✅ QR */}
-      {fileData?.qr_code_url && (
+      {/* QR */}
+      {fileData?.qrCode && (
         <div style={{ marginTop: "30px", textAlign: "center" }}>
           <h3>Scan at Kiosk to Print</h3>
-          <img src={fileData.qr_code_url} width="250" />
+          <img src={fileData.qrCode} width="250" />
         </div>
       )}
 
