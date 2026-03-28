@@ -10,7 +10,6 @@ function App() {
   const processFile = async (selectedFile) => {
     if (!selectedFile) return
 
-    // ✅ Only PDF
     if (selectedFile.type !== "application/pdf") {
       alert("Only PDF files are supported")
       return
@@ -36,7 +35,7 @@ function App() {
       setFileData(data)
 
     } catch (err) {
-      console.error("Upload failed", err)
+      console.error(err)
       alert("Upload failed")
     } finally {
       setLoading(false)
@@ -51,7 +50,6 @@ function App() {
 
   return (
     <div className="app">
-
       <div className="card">
 
         <h1 className="title">PrintAlong</h1>
@@ -59,7 +57,7 @@ function App() {
           Upload your PDF and print instantly using QR
         </p>
 
-        {/* Upload Box */}
+        {/* Upload */}
         <div
           className="upload-box"
           onDrop={(e) => {
