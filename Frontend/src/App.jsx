@@ -1,7 +1,7 @@
 import { useState } from "react"
+import "./App.css"
 
 function App() {
-
   const [file, setFile] = useState(null)
   const [fileData, setFileData] = useState(null)
   const [copies, setCopies] = useState(1)
@@ -50,110 +50,89 @@ function App() {
   }
 
   return (
-    <div style={{
-      padding: "40px",
-      background: "#111",
-      color: "white",
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center"
-    }}>
+    <div className="app">
 
-      <h2>PrintAlong 🚀</h2>
+      <div className="card">
 
-      {/* Upload Box */}
-      <div
-        onDrop={(e) => {
-          e.preventDefault()
-          const droppedFile = e.dataTransfer.files[0]
-          if (droppedFile) processFile(droppedFile)
-        }}
-        onDragOver={(e) => e.preventDefault()}
-        style={{
-          border: "2px dashed gray",
-          padding: "30px",
-          width: "400px",
-          textAlign: "center",
-          marginBottom: "20px"
-        }}
-      >
-        <input
-          type="file"
-          accept=".pdf"
-          onChange={handleFileUpload}
-          style={{ display: "none" }}
-          id="fileInput"
-        />
-
-        <label htmlFor="fileInput" style={{ cursor: "pointer" }}>
-          Drag & Drop or Click to Upload PDF
-        </label>
-      </div>
-
-      {/* Loading */}
-      {loading && <p>Processing your file...</p>}
-
-      {/* File Info */}
-      {file && !loading && (
-        <p>
-          {file.name} ({(file.size / 1024).toFixed(2)} KB)
+        <h1 className="title">PrintAlong</h1>
+        <p className="subtitle">
+          Upload your PDF and print instantly using QR
         </p>
-      )}
 
-      {/* Details */}
-      {fileData && (
-        <div style={{
-          marginTop: "20px",
-          width: "300px",
-          textAlign: "left"
-        }}>
+        {/* Upload Box */}
+        <div
+          className="upload-box"
+          onDrop={(e) => {
+            e.preventDefault()
+            const droppedFile = e.dataTransfer.files[0]
+            if (droppedFile) processFile(droppedFile)
+          }}
+          onDragOver={(e) => e.preventDefault()}
+        >
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileUpload}
+            id="fileInput"
+            hidden
+          />
 
-          <h3>Details</h3>
+          <label htmlFor="fileInput">
+            <span>📄 Drag & Drop</span>
+            <small>or click to upload PDF</small>
+          </label>
+        </div>
 
-          <p>Pages: {fileData.pages}</p>
+        {/* Loading */}
+        {loading && <p className="loading">Processing your file...</p>}
 
-          <div style={{ marginTop: "10px" }}>
-            <label>Copies</label>
-            <input
-              type="number"
-              min="1"
-              value={copies}
-              onChange={(e) => setCopies(Number(e.target.value))}
-              style={{
-                display: "block",
-                marginTop: "5px",
-                padding: "6px",
-                width: "100%"
-              }}
-            />
+        {/* File Info */}
+        {file && !loading && (
+          <p className="file-info">
+            {file.name} • {(file.size / 1024).toFixed(1)} KB
+          </p>
+        )}
+
+        {/* Details */}
+        {fileData && (
+          <div className="details">
+
+            <div className="row">
+              <span>Pages</span>
+              <strong>{fileData.pages}</strong>
+            </div>
+
+            <div className="row">
+              <span>Price / page</span>
+              <strong>₹{fileData.pricePerPage}</strong>
+            </div>
+
+            <div className="row">
+              <span>Copies</span>
+              <input
+                type="number"
+                min="1"
+                value={copies}
+                onChange={(e) => setCopies(Number(e.target.value))}
+              />
+            </div>
+
+            <div className="total">
+              Total ₹{fileData.totalAmount * copies}
+            </div>
+
           </div>
+        )}
 
-          <p style={{ marginTop: "10px" }}>
-            Price per page: ₹{fileData.pricePerPage}
-          </p>
+        {/* QR */}
+        {fileData?.qrCode && (
+          <div className="qr">
+            <p>Scan at the kiosk to print instantly</p>
+            <img src={fileData.qrCode} alt="QR Code" />
+          </div>
+        )}
 
-          <h3 style={{ marginTop: "10px" }}>
-            Total Amount: ₹{fileData.totalAmount * copies}
-          </h3>
-
-          <p style={{ marginTop: "10px" }}>
-            <a href={fileData.printUrl} target="_blank">
-              Open Print Link
-            </a>
-          </p>
-
-        </div>
-      )}
-
-      {/* QR */}
-      {fileData?.qrCode && (
-        <div style={{ marginTop: "30px", textAlign: "center" }}>
-          <h3>Scan at Kiosk to Print</h3>
-          <img src={fileData.qrCode} width="250" />
-        </div>
-      )}
-
+      </div>
     </div>
   )
 }
