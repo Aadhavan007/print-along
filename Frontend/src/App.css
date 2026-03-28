@@ -1,113 +1,151 @@
+/* GLOBAL RESET */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0a0a0a;
+  color: #e5e7eb;
+}
+
+/* FULL SCREEN CENTER */
 .app {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  font-family: system-ui, sans-serif;
+
+  /* subtle gradient instead of blue */
+  background: radial-gradient(circle at top, #111827, #020617);
 }
 
+/* MAIN CARD */
 .card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
+  width: 420px;
+  max-width: 90%;
   padding: 40px;
-  border-radius: 20px;
-  width: 400px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  text-align: center;
+
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
+/* TITLE */
 .title {
   font-size: 28px;
   font-weight: 600;
-  color: white;
+  color: #f9fafb;
+  margin-bottom: 6px;
 }
 
+/* SUBTITLE */
 .subtitle {
-  color: #94a3b8;
-  margin-bottom: 25px;
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 24px;
 }
 
+/* UPLOAD BOX */
 .upload-box {
-  border: 2px dashed #475569;
-  padding: 25px;
+  border: 1.5px dashed #374151;
+  padding: 28px;
   border-radius: 12px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.25s ease;
+  background: rgba(255,255,255,0.02);
 }
 
 .upload-box:hover {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.1);
+  border-color: #6b7280;
+  background: rgba(255,255,255,0.05);
 }
 
+/* UPLOAD TEXT */
 .upload-box span {
   display: block;
-  font-size: 18px;
-  color: white;
+  font-size: 16px;
+  color: #e5e7eb;
 }
 
 .upload-box small {
-  color: #94a3b8;
+  color: #6b7280;
+  font-size: 13px;
 }
 
+/* LOADING */
 .loading {
-  margin-top: 15px;
-  color: #c084fc;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #9ca3af;
 }
 
+/* FILE INFO */
 .file-info {
-  margin-top: 15px;
-  color: #cbd5f5;
+  margin-top: 14px;
+  font-size: 13px;
+  color: #9ca3af;
 }
 
+/* DETAILS */
 .details {
-  margin-top: 20px;
-  text-align: left;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
+/* ROW */
 .row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
-  color: #e2e8f0;
+  margin-bottom: 12px;
+  font-size: 14px;
 }
 
+.row span {
+  color: #9ca3af;
+}
+
+.row strong {
+  color: #f9fafb;
+}
+
+/* INPUT */
 .row input {
   width: 60px;
-  padding: 4px;
+  padding: 6px;
   border-radius: 6px;
   border: none;
+  background: #111827;
+  color: white;
+  text-align: center;
 }
 
+/* TOTAL */
 .total {
-  margin-top: 15px;
-  font-size: 20px;
-  font-weight: bold;
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 600;
   color: #22c55e;
 }
 
-.print-btn {
-  display: block;
-  margin-top: 15px;
-  background: #8b5cf6;
-  padding: 10px;
-  text-align: center;
-  border-radius: 8px;
-  color: white;
-  text-decoration: none;
-  transition: 0.3s;
-}
-
-.print-btn:hover {
-  background: #7c3aed;
-}
-
+/* QR */
 .qr {
-  margin-top: 25px;
+  margin-top: 26px;
+  text-align: center;
+}
+
+.qr p {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 10px;
 }
 
 .qr img {
-  width: 200px;
-  border-radius: 10px;
+  width: 180px;
+  border-radius: 12px;
+  background: white;
+  padding: 8px;
 }
