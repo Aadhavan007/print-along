@@ -57,7 +57,6 @@ function App() {
           Upload your PDF and print instantly using QR
         </p>
 
-        {/* Upload */}
         <div
           className="upload-box"
           onDrop={(e) => {
@@ -81,17 +80,14 @@ function App() {
           </label>
         </div>
 
-        {/* Loading */}
         {loading && <p className="loading">Processing your file...</p>}
 
-        {/* File Info */}
         {file && !loading && (
           <p className="file-info">
             {file.name} • {(file.size / 1024).toFixed(1)} KB
           </p>
         )}
 
-        {/* Details */}
         {fileData && (
           <div className="details">
 
@@ -128,7 +124,6 @@ function App() {
           </div>
         )}
 
-        {/* QR */}
         {fileData?.qrCode && (
           <div className="qr">
             <p>Scan at the kiosk to print instantly</p>

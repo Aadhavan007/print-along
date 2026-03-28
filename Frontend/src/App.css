@@ -1,9 +1,7 @@
-/* RESET */
 * {
   box-sizing: border-box;
 }
 
-/* BASE */
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
@@ -25,10 +23,8 @@ body {
   width: 520px;
   max-width: 100%;
   padding: 32px;
-
-  background: #111111;
+  background: #111;
   border-radius: 16px;
-
   box-shadow: 0 20px 40px rgba(0,0,0,0.7);
 }
 
@@ -46,16 +42,14 @@ body {
   margin: 6px 0 24px;
 }
 
-/* UPLOAD BOX */
+/* UPLOAD */
 .upload-box {
   border: 1px dashed #2a2a2a;
   padding: 24px;
   border-radius: 12px;
   text-align: center;
   cursor: pointer;
-
   background: #0d0d0d;
-  transition: 0.2s ease;
 }
 
 .upload-box:hover {
@@ -87,7 +81,7 @@ body {
   border-top: 1px solid #1f1f1f;
 }
 
-/* ROW LAYOUT */
+/* ALIGNMENT */
 .row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -99,25 +93,22 @@ body {
   color: #a1a1aa;
 }
 
-/* VALUE COLUMN (KEY ALIGNMENT FIX) */
 .value {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  width: 70px;
+  width: 60px;
 }
 
-/* TEXT VALUES */
 .value strong {
-  width: 50px;
+  width: 100%;
   text-align: right;
-  display: block;
 }
 
-/* INPUT (PERFECTLY MATCHED SIZE & POSITION) */
+/* INPUT PERFECT ALIGNMENT */
 .value input {
-  width: 50px;
-  height: 28px;
+  width: 42px;
+  height: 26px;
 
   border-radius: 6px;
   border: none;
@@ -129,6 +120,8 @@ body {
 
   font-size: 14px;
   font-family: inherit;
+
+  margin-right: 2px;
 }
 
 /* TOTAL */
@@ -140,7 +133,7 @@ body {
   text-align: right;
 }
 
-/* QR SECTION */
+/* QR */
 .qr {
   margin-top: 28px;
   text-align: center;
