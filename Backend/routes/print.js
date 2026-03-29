@@ -14,7 +14,7 @@ router.get("/:job_id", async (req, res) => {
     }
 
     // ✅ Direct redirect to file
-    return res.redirect(job.file_url);
+    return res.redirect(`${job.file_url}?fl_attachment=true`);
 
   } catch (error) {
     console.error("PRINT ERROR:", error);

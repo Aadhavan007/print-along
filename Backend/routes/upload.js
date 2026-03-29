@@ -39,8 +39,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const jobId = Date.now().toString();
 
     // 🔗 Print URL
-    const printUrl = `https://${req.get("host")}/print/${jobId}`;
-
+    const printUrl = `${fileUrl}?fl_attachment=true`;
     // 📱 QR Code
     const qrCode = await generateQR(printUrl);
 
