@@ -3,12 +3,15 @@ const multer = require("multer");
 const pdf = require("pdf-parse");
 
 const Job = require("../models/Job");
-const generateQR = require("../services/qrService");
 const { uploadToCloudinary } = require("../services/cloudinaryService");
+const generateQR = require("../services/qrService"); // ✅ added
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+/* =========================
+   📄 FILE UPLOAD ROUTE
+========================= */
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -17,7 +20,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // ✅ Restrict to PDF only
+    // ✅ Only PDF
     if (!file.mimetype.includes("pdf")) {
       return res.status(400).json({ error: "Only PDF files are supported" });
     }
@@ -38,11 +41,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     // 🆔 Job ID
     const jobId = Date.now().toString();
 
-    // 🔗 Print URL
-    const printUrl = `${fileUrl}?fl_attachment=true`;
-    // 📱 QR Code
-    const qrCode = await generateQR(printUrl);
-
     // 💾 Save job
     await Job.create({
       job_id: jobId,
@@ -51,13 +49,13 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       total_amount: totalAmount
     });
 
+    // ✅ Return ONLY data (no QR yet)
     res.json({
       jobId,
       pages,
       pricePerPage,
       totalAmount,
-      printUrl,
-      qrCode
+      fileUrl
     });
 
   } catch (err) {
@@ -65,5 +63,28 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     res.status(500).json({ error: "Processing failed" });
   }
 });
+
+
+/* =========================
+   📱 QR GENERATION (AFTER PAYMENT)
+========================= */
+router.post("/generate-qr", async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: "URL required" });
+    }
+
+    const qrCode = await generateQR(url);
+
+    res.json({ qrCode });
+
+  } catch (err) {
+    console.error("QR ERROR:", err);
+    res.status(500).json({ error: "QR generation failed" });
+  }
+});
+
 
 module.exports = router;
