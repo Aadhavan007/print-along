@@ -6,6 +6,7 @@ function App() {
   const [fileData, setFileData] = useState(null)
   const [copies, setCopies] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [qrCode, setQrCode] = useState(null) // ✅ NEW
 
   const processFile = async (selectedFile) => {
     if (!selectedFile) return
@@ -17,6 +18,7 @@ function App() {
 
     setFile(selectedFile)
     setFileData(null)
+    setQrCode(null)
     setLoading(true)
 
     const formData = new FormData()
@@ -48,6 +50,63 @@ function App() {
     e.target.value = null
   }
 
+  // 💳 PAYMENT HANDLER
+  const handlePayment = async () => {
+    try {
+      const res = await fetch(
+        "https://print-along-api.onrender.com/payment/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            amount: fileData.totalAmount * copies
+          })
+        }
+      )
+
+      const order = await res.json()
+
+      const options = {
+        key: "YOUR_RAZORPAY_KEY_ID", // 🔥 replace this
+        amount: order.amount,
+        currency: "INR",
+        name: "PrintAlong",
+        description: "Print Payment",
+        order_id: order.id,
+
+        handler: async function () {
+          alert("Payment Successful ✅")
+
+          // ✅ AFTER PAYMENT → GENERATE QR
+          const printUrl = `${fileData.fileUrl}?fl_attachment=true`
+
+          const qrRes = await fetch(
+            "https://print-along-api.onrender.com/api/generate-qr",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ url: printUrl })
+            }
+          )
+
+          const qrData = await qrRes.json()
+          setQrCode(qrData.qrCode)
+        }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+
+    } catch (err) {
+      console.error(err)
+      alert("Payment failed")
+    }
+  }
+
   return (
     <div className="app">
       <div className="card">
@@ -57,6 +116,7 @@ function App() {
           Upload your PDF and print instantly using QR
         </p>
 
+        {/* Upload */}
         <div
           className="upload-box"
           onDrop={(e) => {
@@ -121,13 +181,32 @@ function App() {
               Total ₹{fileData.totalAmount * copies}
             </div>
 
+            {/* 💳 PAY BUTTON */}
+            <button
+              onClick={handlePayment}
+              style={{
+                marginTop: "16px",
+                width: "100%",
+                padding: "10px",
+                borderRadius: "8px",
+                border: "none",
+                background: "#22c55e",
+                color: "black",
+                fontWeight: "600",
+                cursor: "pointer"
+              }}
+            >
+              Pay & Generate QR
+            </button>
+
           </div>
         )}
 
-        {fileData?.qrCode && (
+        {/* ✅ QR AFTER PAYMENT */}
+        {qrCode && (
           <div className="qr">
             <p>Scan at the kiosk to print instantly</p>
-            <img src={fileData.qrCode} alt="QR Code" />
+            <img src={qrCode} alt="QR Code" />
           </div>
         )}
 
