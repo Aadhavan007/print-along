@@ -125,7 +125,10 @@ function App() {
           <>
             {/* ✅ PDF PREVIEW (same layout, no break) */}
             <div className="preview">
-              <iframe src={fileData.fileUrl} title="PDF Preview" />
+              <iframe
+                src={`${fileData.fileUrl}#toolbar=0`}
+                title="PDF Preview"
+              />
             </div>
 
             {/* DETAILS */}
