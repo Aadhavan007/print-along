@@ -32,7 +32,10 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const pages = data.numpages;
 
     // ☁️ Upload to Cloudinary
-    const fileUrl = await uploadToCloudinary(file.buffer, file.originalname);
+    let fileUrl = await uploadToCloudinary(file.buffer, file.originalname);
+
+    // 🔥 FORCE INLINE VIEW (IMPORTANT)
+    fileUrl = fileUrl.replace("/upload/", "/upload/fl_inline/");
 
     // 💰 Pricing
     const pricePerPage = 2;
