@@ -19,7 +19,8 @@ function uploadToCloudinary(buffer, filename) {
 
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "auto",
+        resource_type: "raw",
+        access_mode: "public",
         public_id: cleanName,
         use_filename: true,
         unique_filename: false,
