@@ -6,7 +6,7 @@ function App() {
   const [fileData, setFileData] = useState(null)
   const [copies, setCopies] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [qrCode, setQrCode] = useState(null) // ✅ NEW
+  const [qrCode, setQrCode] = useState(null)
 
   const processFile = async (selectedFile) => {
     if (!selectedFile) return
@@ -50,60 +50,30 @@ function App() {
     e.target.value = null
   }
 
-  // 💳 PAYMENT HANDLER
+  // 💰 FAKE PAYMENT
   const handlePayment = async () => {
     try {
-      const res = await fetch(
-        "https://print-along-api.onrender.com/payment/create-order",
+      alert("Payment Successful (Simulated)")
+
+      const printUrl = `${fileData.fileUrl}?fl_attachment=true`
+
+      const qrRes = await fetch(
+        "https://print-along-api.onrender.com/api/generate-qr",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            amount: fileData.totalAmount * copies
-          })
+          body: JSON.stringify({ url: printUrl })
         }
       )
 
-      const order = await res.json()
-
-      const options = {
-        key: "YOUR_RAZORPAY_KEY_ID", // 🔥 replace this
-        amount: order.amount,
-        currency: "INR",
-        name: "PrintAlong",
-        description: "Print Payment",
-        order_id: order.id,
-
-        handler: async function () {
-          alert("Payment Successful ✅")
-
-          // ✅ AFTER PAYMENT → GENERATE QR
-          const printUrl = `${fileData.fileUrl}?fl_attachment=true`
-
-          const qrRes = await fetch(
-            "https://print-along-api.onrender.com/api/generate-qr",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ url: printUrl })
-            }
-          )
-
-          const qrData = await qrRes.json()
-          setQrCode(qrData.qrCode)
-        }
-      }
-
-      const rzp = new window.Razorpay(options)
-      rzp.open()
+      const qrData = await qrRes.json()
+      setQrCode(qrData.qrCode)
 
     } catch (err) {
       console.error(err)
-      alert("Payment failed")
+      alert("Something went wrong")
     }
   }
 
@@ -140,69 +110,67 @@ function App() {
           </label>
         </div>
 
+        {/* Loading */}
         {loading && <p className="loading">Processing your file...</p>}
 
+        {/* File Info */}
         {file && !loading && (
           <p className="file-info">
             {file.name} • {(file.size / 1024).toFixed(1)} KB
           </p>
         )}
 
+        {/* DATA */}
         {fileData && (
-          <div className="details">
+          <>
+            {/* ✅ PDF PREVIEW (same layout, no break) */}
+            <div className="preview">
+              <iframe src={fileData.fileUrl} title="PDF Preview" />
+            </div>
 
-            <div className="row">
-              <span>Pages</span>
-              <div className="value">
-                <strong>{fileData.pages}</strong>
+            {/* DETAILS */}
+            <div className="details">
+
+              <div className="row">
+                <span>Pages</span>
+                <div className="value">
+                  <strong>{fileData.pages}</strong>
+                </div>
               </div>
-            </div>
 
-            <div className="row">
-              <span>Price / page</span>
-              <div className="value">
-                <strong>₹{fileData.pricePerPage}</strong>
+              <div className="row">
+                <span>Price / page</span>
+                <div className="value">
+                  <strong>₹{fileData.pricePerPage}</strong>
+                </div>
               </div>
-            </div>
 
-            <div className="row">
-              <span>Copies</span>
-              <div className="value">
-                <input
-                  type="number"
-                  min="1"
-                  value={copies}
-                  onChange={(e) => setCopies(Number(e.target.value))}
-                />
+              <div className="row">
+                <span>Copies</span>
+                <div className="value">
+                  <input
+                    type="number"
+                    min="1"
+                    value={copies}
+                    onChange={(e) => setCopies(Number(e.target.value))}
+                  />
+                </div>
               </div>
+
+              <div className="total">
+                Total ₹{fileData.totalAmount * copies}
+              </div>
+
+              {/* 💰 PAY BUTTON */}
+              <button className="pay-btn" onClick={handlePayment}>
+                Pay & Generate QR
+              </button>
+
             </div>
-
-            <div className="total">
-              Total ₹{fileData.totalAmount * copies}
-            </div>
-
-            {/* 💳 PAY BUTTON */}
-            <button
-              onClick={handlePayment}
-              style={{
-                marginTop: "16px",
-                width: "100%",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "none",
-                background: "#22c55e",
-                color: "black",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Pay & Generate QR
-            </button>
-
-          </div>
+          </>
         )}
 
-        {/* ✅ QR AFTER PAYMENT */}
+        {/* QR */}
         {qrCode && (
           <div className="qr">
             <p>Scan at the kiosk to print instantly</p>

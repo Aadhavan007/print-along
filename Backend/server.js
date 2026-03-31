@@ -7,7 +7,7 @@ const connectDB = require("./config/db");
 // routes
 const uploadRoute = require("./routes/upload");
 const printRoute = require("./routes/print");
-const paymentRoute = require("./routes/payment"); // ✅ ADDED
+const jobRoute = require("./routes/job");
 
 const app = express();
 
@@ -21,7 +21,8 @@ app.use(express.json());
 // 🚀 routes
 app.use("/api", uploadRoute);
 app.use("/print", printRoute);
-app.use("/payment", paymentRoute); // ✅ ADDED
+app.use("/api/job", jobRoute); // ✅ ADDED
+
 
 // 🧪 test route
 app.get("/", (req, res) => {

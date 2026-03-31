@@ -46,7 +46,8 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       job_id: jobId,
       file_url: fileUrl,
       pages,
-      total_amount: totalAmount
+      total_amount: totalAmount,
+      status: "pending" // ✅ ADDED
     });
 
     // ✅ Return ONLY data (no QR yet)

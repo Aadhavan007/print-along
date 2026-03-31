@@ -12,6 +12,10 @@ const jobSchema = new mongoose.Schema({
   },
   pages: Number,
   total_amount: Number,
+  status: {
+    type: String,
+    default: "pending" // ✅ ADDED
+  },
   created_at: {
     type: Date,
     default: Date.now
