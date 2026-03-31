@@ -8,41 +8,39 @@ cloudinary.config({
 })
 
 function uploadToCloudinary(buffer, filename) {
-
   return new Promise((resolve, reject) => {
 
-    // Remove spaces at start/end
-    let cleanName = filename.trim()
-
-    // Replace spaces with underscore
-    cleanName = cleanName.replace(/\s+/g, "_")
+    // Clean filename
+    let cleanName = filename.trim().replace(/\s+/g, "_")
 
     const stream = cloudinary.uploader.upload_stream(
       {
-    
-    resource_type: "raw",
-    access_mode: "public",
-    flags: "attachment:false",
-
-    public_id: cleanName,
-    use_filename: true,
-    unique_filename: false,
-    type: "upload",
-  },
+        resource_type: "raw",
+        public_id: cleanName,
+        use_filename: true,
+        unique_filename: false,
+        type: "upload",
+      },
       (error, result) => {
         if (error) {
           console.error("Cloudinary Upload Error:", error)
-          reject(error)
-        } else {
-          resolve(result.secure_url)
+          return reject(error)
         }
+
+        // ✅ FORCE PUBLIC INLINE URL (IMPORTANT FIX)
+        const publicUrl = result.secure_url.replace(
+          "/upload/",
+          "/upload/fl_attachment:false/"
+        )
+
+        console.log("✅ FILE URL:", publicUrl)
+
+        resolve(publicUrl)
       }
     )
 
     stream.end(buffer)
-
   })
-
 }
 
 module.exports = {
