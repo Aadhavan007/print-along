@@ -19,13 +19,16 @@ function uploadToCloudinary(buffer, filename) {
 
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "raw",
-        access_mode: "public",
-        public_id: cleanName,
-        use_filename: true,
-        unique_filename: false,
-        type: "upload",
-      },
+    
+    resource_type: "raw",
+    access_mode: "public",
+    flags: "attachment:false",
+
+    public_id: cleanName,
+    use_filename: true,
+    unique_filename: false,
+    type: "upload",
+  },
       (error, result) => {
         if (error) {
           console.error("Cloudinary Upload Error:", error)

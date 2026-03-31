@@ -125,10 +125,7 @@ function App() {
           <>
             {/* ✅ PDF PREVIEW (FIXED) */}
               <div className="preview">
-              <iframe
-              src={`https://docs.google.com/gview?url=${fileData.fileUrl}&embedded=true`}
-              title="PDF Preview"
-              />
+              <iframe src={fileData.fileUrl} />
               </div>
 
             {/* DETAILS */}
