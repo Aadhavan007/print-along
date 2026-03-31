@@ -123,13 +123,13 @@ function App() {
         {/* DATA */}
         {fileData && (
           <>
-            {/* ✅ PDF PREVIEW (same layout, no break) */}
-            <div className="preview">
+            {/* ✅ PDF PREVIEW (FIXED) */}
+              <div className="preview">
               <iframe
-                src={`${fileData.fileUrl}#toolbar=0`}
-                title="PDF Preview"
+              src={`https://docs.google.com/gview?url=${fileData.fileUrl}&embedded=true`}
+              title="PDF Preview"
               />
-            </div>
+              </div>
 
             {/* DETAILS */}
             <div className="details">
