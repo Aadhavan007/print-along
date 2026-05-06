@@ -200,20 +200,27 @@ body {
 }
 
 /* =========================
-   PDF PREVIEW (NON-BREAKING)
+   PDF PREVIEW
 ========================= */
 .preview {
   margin-top: 20px;
+
+  width: 100%;
+  height: 500px;
+
   border-radius: 12px;
   overflow: hidden;
+
   background: #0d0d0d;
   border: 1px solid #1f1f1f;
 }
 
 .preview iframe {
   width: 100%;
-  height: 400px;
+  height: 100%;
   border: none;
+
+  display: block;
 }
 
 /* =========================
