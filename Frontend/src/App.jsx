@@ -176,8 +176,6 @@ function App() {
 
             </div>
 
-            </div>
-
             {/* 📊 DETAILS */}
             <div className="details">
 
