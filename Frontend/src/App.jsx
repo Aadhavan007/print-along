@@ -167,7 +167,7 @@ function App() {
             <div className="preview">
 
               <iframe
-                src={`https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(fileData.fileUrl)}`}
+                src={`${fileData.fileUrl}#toolbar=0`}
                 width="100%"
                 height="100%"
                 title="PDF Preview"
