@@ -14,7 +14,8 @@ function uploadToCloudinary(buffer, filename) {
 
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "auto",
+        resource_type: "raw",
+        format: "pdf",
         public_id: cleanName,
         use_filename: true,
         unique_filename: false,
