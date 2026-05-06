@@ -164,14 +164,17 @@ function App() {
           <>
 
             {/* ✅ PDF PREVIEW */}
-            <div className="preview">
+            <div className="preview-button">
+              <a
+              href={fileData.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="open-preview-btn"
+              >
+            Open PDF Preview
+              </a>
 
-              <iframe
-                src={`${fileData.fileUrl}#toolbar=0`}
-                width="100%"
-                height="100%"
-                title="PDF Preview"
-              />
+            </div>
 
             </div>
 
